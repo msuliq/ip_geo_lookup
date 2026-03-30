@@ -39,5 +39,11 @@ jobs:
         with:
           ruby-version: "3.0"
           bundler-cache: true
+      - name: Verify MaxMind database is present
+        run: |
+          if [ ! -f data/GeoLite2-City.mmdb ]; then
+            echo "::error::data/GeoLite2-City.mmdb is missing — gem cannot be built without it"
+            exit 1
+          fi
       - name: Build gem
         run: gem build *.gemspec
