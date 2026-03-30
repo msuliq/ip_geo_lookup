@@ -1,0 +1,21 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+*.gem
+Gemfile.lock
+.claude
+
+# MMDB database (too large for git; placed in data/ for gem builds)
+/data/*.mmdb
+
+# Test fixtures (generated at test time by before(:suite))
+/spec/fixtures/*.mmdb
+
+# MaxMind CSV source files
+/GeoLite2-City-CSV*/
+*.csv
