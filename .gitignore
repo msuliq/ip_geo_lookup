@@ -10,9 +10,6 @@
 Gemfile.lock
 .claude
 
-# MMDB database (too large for git; placed in data/ for gem builds)
-/data/*.mmdb
-
 # Test fixtures (generated at test time by before(:suite))
 /spec/fixtures/*.mmdb
 
