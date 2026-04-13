@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-13
+
+### Fixed
+
+- Normalize non-ASCII characters in geolocation string fields (`country_name`, `region`, `city`, `continent_name`) to ASCII-only Latin characters
+- Accented Latin characters are transliterated via Unicode NFD decomposition (e.g., "São Paulo" → "Sao Paulo", "Zürich" → "Zurich")
+- Non-Latin scripts (Arabic, Chinese, Devanagari, Armenian, Georgian, Hebrew) are stripped to guarantee consistent ASCII output
+
 ## [0.1.1] - 2026-03-30
 
 ### Fixed
@@ -33,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI via GitHub Actions: test matrix (Ruby 2.6, 3.0, 4.0), StandardRB linting, automated gem publishing
 - Dependabot for actions and bundler dependency updates
 
-[Unreleased]: https://github.com/msuliq/ip_geo_lookup/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/msuliq/ip_geo_lookup/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/msuliq/ip_geo_lookup/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/msuliq/ip_geo_lookup/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/msuliq/ip_geo_lookup/releases/tag/v0.1.0
