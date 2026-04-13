@@ -72,6 +72,125 @@ RSpec.describe IpGeoLookup do
         expect(described_class.lookup(":::invalid")).to be_nil
       end
     end
+
+    context "non-ASCII characters" do
+      before(:each) do
+        described_class.configure do |config|
+          config.database_path = File.join(FIXTURES_DIR, "non_ascii.mmdb")
+        end
+      end
+
+      it "transliterates accented characters to ASCII equivalents" do
+        result = described_class.lookup("64.0.0.1")
+        expect(result.city).to eq("Sao Paulo")
+        expect(result.region).to eq("Sao Paulo")
+        expect(result.continent_name).to eq("America del Sur")
+      end
+
+      it "normalizes umlauts to plain Latin characters" do
+        result = described_class.lookup("128.0.0.1")
+        expect(result.city).to eq("Zurich")
+        expect(result.region).to eq("Zurich")
+      end
+
+      it "returns all string fields as valid UTF-8" do
+        result = described_class.lookup("64.0.0.1")
+        [result.country_name, result.region, result.city, result.continent_name].each do |field|
+          expect(field.encoding).to eq(Encoding::UTF_8)
+          expect(field).to match(/\A[\x00-\x7F]*\z/)
+        end
+      end
+
+      it "preserves non-accented data unchanged" do
+        result = described_class.lookup("128.0.0.1")
+        expect(result.country_code).to eq("CH")
+        expect(result.country_name).to eq("Switzerland")
+        expect(result.time_zone).to eq("Europe/Zurich")
+        expect(result.postal_code).to eq("8001")
+      end
+    end
+
+    context "non-Latin scripts" do
+      before(:each) do
+        described_class.configure do |config|
+          config.database_path = File.join(FIXTURES_DIR, "non_latin.mmdb")
+        end
+      end
+
+      it "strips Arabic script characters" do
+        result = described_class.lookup("20.0.0.1")
+        expect(result.country_code).to eq("EG")
+        expect(result.city).to eq("")
+        expect(result.country_name).to eq("")
+        expect(result.region).to eq("")
+        expect(result.continent_name).to eq("")
+      end
+
+      it "strips Chinese characters" do
+        result = described_class.lookup("30.0.0.1")
+        expect(result.country_code).to eq("CN")
+        expect(result.city).to eq("")
+        expect(result.country_name).to eq("")
+        expect(result.region).to eq("")
+      end
+
+      it "strips Devanagari (Hindi) characters" do
+        result = described_class.lookup("40.0.0.1")
+        expect(result.country_code).to eq("IN")
+        expect(result.city).to eq("")
+        expect(result.country_name).to eq("")
+        expect(result.region).to eq("")
+      end
+
+      it "transliterates Japanese macron-accented Latin to ASCII" do
+        result = described_class.lookup("10.0.0.1")
+        expect(result.country_code).to eq("JP")
+        expect(result.city).to eq("Tokyo")
+        expect(result.region).to eq("Tokyo")
+        expect(result.country_name).to eq("Japan")
+      end
+
+      it "strips Armenian script characters" do
+        result = described_class.lookup("50.0.0.1")
+        expect(result.country_code).to eq("AM")
+        expect(result.city).to eq("")
+        expect(result.country_name).to eq("")
+        expect(result.region).to eq("")
+      end
+
+      it "strips Georgian script characters" do
+        result = described_class.lookup("60.0.0.1")
+        expect(result.country_code).to eq("GE")
+        expect(result.city).to eq("")
+        expect(result.country_name).to eq("")
+        expect(result.region).to eq("")
+      end
+
+      it "strips Hebrew script characters" do
+        result = described_class.lookup("70.0.0.1")
+        expect(result.country_code).to eq("IL")
+        expect(result.city).to eq("")
+        expect(result.country_name).to eq("")
+        expect(result.region).to eq("")
+      end
+
+      it "returns ASCII-only strings for all non-Latin scripts" do
+        %w[10.0.0.1 20.0.0.1 30.0.0.1 40.0.0.1 50.0.0.1 60.0.0.1 70.0.0.1].each do |ip|
+          result = described_class.lookup(ip)
+          [result.country_name, result.region, result.city, result.continent_name].each do |field|
+            expect(field.encoding).to eq(Encoding::UTF_8)
+            expect(field).to match(/\A[\x00-\x7F]*\z/), "Expected ASCII-only for #{ip}, got: #{field.inspect}"
+          end
+        end
+      end
+
+      it "preserves country_code, time_zone, and postal_code unchanged" do
+        result = described_class.lookup("10.0.0.1")
+        expect(result.country_code).to eq("JP")
+        expect(result.time_zone).to eq("Asia/Tokyo")
+        expect(result.postal_code).to eq("100-0001")
+      end
+    end
   end
 
   describe ".metadata" do

@@ -31,6 +31,22 @@ RSpec.configure do |config|
     MMDBBuilder.write(File.join(FIXTURES_DIR, "ipv6_with_v4.mmdb"),
       ip_version: 6, record_size: 28,
       records: {"2001::/16" => TestRecords::DE, "4000::/2" => TestRecords::AU})
+
+    MMDBBuilder.write(File.join(FIXTURES_DIR, "non_ascii.mmdb"),
+      ip_version: 4, record_size: 24,
+      records: {"64.0.0.0/2" => TestRecords::BR, "128.0.0.0/2" => TestRecords::CH})
+
+    MMDBBuilder.write(File.join(FIXTURES_DIR, "non_latin.mmdb"),
+      ip_version: 4, record_size: 24,
+      records: {
+        "10.0.0.0/8" => TestRecords::JP,
+        "20.0.0.0/8" => TestRecords::EG,
+        "30.0.0.0/8" => TestRecords::CN,
+        "40.0.0.0/8" => TestRecords::IN,
+        "50.0.0.0/8" => TestRecords::AM,
+        "60.0.0.0/8" => TestRecords::GE,
+        "70.0.0.0/8" => TestRecords::IL
+      })
   end
 
   config.after(:each) { IpGeoLookup.reset! }

@@ -70,17 +70,27 @@ module IpGeoLookup
     def build_result(record)
       Result.new(
         country_code: deep_fetch(record, "country", "iso_code"),
-        country_name: deep_fetch(record, "country", "names", "en"),
-        region: deep_fetch(record, "subdivisions", 0, "names", "en"),
-        city: deep_fetch(record, "city", "names", "en"),
+        country_name: normalize_str(deep_fetch(record, "country", "names", "en")),
+        region: normalize_str(deep_fetch(record, "subdivisions", 0, "names", "en")),
+        city: normalize_str(deep_fetch(record, "city", "names", "en")),
         continent_code: deep_fetch(record, "continent", "code"),
-        continent_name: deep_fetch(record, "continent", "names", "en"),
+        continent_name: normalize_str(deep_fetch(record, "continent", "names", "en")),
         latitude: deep_fetch(record, "location", "latitude"),
         longitude: deep_fetch(record, "location", "longitude"),
         time_zone: deep_fetch(record, "location", "time_zone"),
         postal_code: deep_fetch(record, "postal", "code"),
         raw: record
       )
+    end
+
+    def normalize_str(str)
+      return nil if str.nil?
+
+      str = str.encode("UTF-8") unless str.encoding == Encoding::UTF_8
+      str.unicode_normalize(:nfd)
+        .gsub(/[^\p{ASCII}]/, "")
+        .gsub(/\s+/, " ")
+        .strip
     end
 
     def deep_fetch(obj, *keys)
